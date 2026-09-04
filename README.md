@@ -11,7 +11,7 @@ Privileged commands should not wait invisibly.
 Requirements: Pi, `pkexec`, and a running Omarchy shell with its Polkit agent.
 
 ```sh
-pi install git:git@github.com:adrunkhuman/pi-omarchy-sudo-prompt
+pi install https://github.com/adrunkhuman/pi-omarchy-sudo-prompt
 ```
 
 Reload Pi after installation:
@@ -62,7 +62,7 @@ The review screen never collects a password. Omarchy's Polkit agent owns authent
 ## Remove
 
 ```sh
-pi remove git:git@github.com:adrunkhuman/pi-omarchy-sudo-prompt
+pi remove https://github.com/adrunkhuman/pi-omarchy-sudo-prompt
 omarchy-shell shell setPluginEnabled io.github.adrunkhuman.pi-omarchy-sudo-prompt false
 rm -rf ~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt
 ```
