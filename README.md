@@ -27,12 +27,12 @@ The extension installs and enables its user-owned Omarchy service under `~/.conf
 1. The agent calls `privileged_exec(command, reason, impact)`.
 2. The desktop shows the exact request.
 3. You approve with a click or **Ctrl+Enter**. To deny, optionally type a short reply for the agent, then click **Deny**, press **Enter** in the reply field, or press **Esc**.
-4. `pkexec` starts Omarchy's real Polkit authentication flow.
+4. `pkexec` starts Omarchy's Polkit authentication flow.
 5. The command runs as root only after both steps succeed.
 
 Approved input runs as `/usr/bin/bash -c` from Pi's current directory. A root-side `timeout` stops it after ten minutes, and large output is truncated to Pi's normal tool limits. Once execution starts, canceling Pi cannot reliably stop the elevated process; its root-side timeout remains in force.
 
-A best-effort guard blocks direct `sudo`, `sudoedit`, `doas`, `pkexec`, and `su` calls in Pi's Bash tool and Herdr's `run` and `send` actions. The agent gets a short instruction to use `privileged_exec` instead.
+A command-position heuristic catches ordinary `sudo`, `sudoedit`, `doas`, `pkexec`, and `su` calls in Pi's Bash tool and Herdr's `run` and `send` actions. It does not parse shell syntax. The agent gets a short instruction to use `privileged_exec` instead.
 
 Approval requests expire after two minutes. Long requests scroll; short requests stay compact.
 

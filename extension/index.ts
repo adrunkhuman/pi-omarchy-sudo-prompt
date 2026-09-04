@@ -68,8 +68,14 @@ function combinedOutput(stdout: string, stderr: string): string {
 }
 
 export default function (pi: ExtensionAPI) {
-	let approvalQueue: Promise<void> = Promise.resolve();
 	let setup: Promise<void> | undefined;
+	let queue: Promise<unknown> = Promise.resolve();
+
+	function serialize<T>(operation: () => Promise<T>): Promise<T> {
+		const result = queue.then(operation, operation);
+		queue = result.then(() => undefined, () => undefined);
+		return result;
+	}
 
 	async function prepareUi(): Promise<void> {
 		if (setup) return setup;
@@ -102,39 +108,6 @@ export default function (pi: ExtensionAPI) {
 			);
 		}
 		return result.stdout.trim();
-	}
-
-	async function withApprovalLock<T>(signal: AbortSignal | undefined, operation: () => Promise<T>): Promise<T> {
-		// Omarchy's approval service accepts one request at a time.
-		const previous = approvalQueue;
-		let release!: () => void;
-		approvalQueue = new Promise<void>((resolve) => {
-			release = resolve;
-		});
-		let acquired = false;
-
-		try {
-			if (!signal) await previous;
-			else {
-				await new Promise<void>((resolve, reject) => {
-					const onAbort = () => reject(signal.reason ?? new Error("Cancelled"));
-					if (signal.aborted) {
-						onAbort();
-						return;
-					}
-					signal.addEventListener("abort", onAbort, { once: true });
-					previous.then(() => {
-						signal.removeEventListener("abort", onAbort);
-						resolve();
-					});
-				});
-			}
-			acquired = true;
-			return await operation();
-		} finally {
-			if (acquired) release();
-			else void previous.then(release);
-		}
 	}
 
 	async function requestApproval(
@@ -206,7 +179,7 @@ export default function (pi: ExtensionAPI) {
 			}
 			await prepareUi();
 
-			return withApprovalLock(signal, async () => {
+			return serialize(async () => {
 				pi.events.emit("herdr:blocked", { active: true, label: "privilege approval" });
 				let approvalId: string | undefined;
 				try {
@@ -232,10 +205,7 @@ export default function (pi: ExtensionAPI) {
 							"-c",
 							wrappedCommand,
 						],
-						{
-							timeout: EXECUTION_TIMEOUT_MS,
-							cwd: ctx.cwd,
-						},
+						{ timeout: EXECUTION_TIMEOUT_MS, cwd: ctx.cwd },
 					);
 					const output = combinedOutput(result.stdout, result.stderr);
 					if (result.code !== 0) throw new Error(`Privileged command exited ${result.code}.\n${output}`);

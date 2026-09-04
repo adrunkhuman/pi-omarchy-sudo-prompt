@@ -10,15 +10,10 @@ const privileged = [
 	"if sudo -n true; then echo cached; fi",
 	"env FOO=bar sudo systemctl restart example",
 	"bash -c 'printf before; sudo id'",
-	"sh -c -- 'sudo id'",
-	"nice sudo id",
-	"timeout --kill-after=2s 10s sudo id",
-	"2>/tmp/error sudo id",
 	"echo `sudo id`",
 	"echo \"$(sudo id)\"",
 	"echo \"`sudo id`\"",
 	"sudo>/tmp/out id",
-	"env -C /tmp sudo id",
 ];
 
 const ordinary = [

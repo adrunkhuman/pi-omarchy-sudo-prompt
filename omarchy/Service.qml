@@ -88,7 +88,7 @@ Item {
   IpcHandler {
     target: "io.github.adrunkhuman.pi-privileged-exec"
 
-    function version(): string { return "0.2.2" }
+    function version(): string { return "0.3.0" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)
