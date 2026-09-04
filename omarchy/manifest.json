@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.adrunkhuman.pi-privileged-exec",
+  "name": "Pi Privilege Approval",
+  "version": "0.1.0",
+  "description": "Shows a desktop-wide review screen before Pi requests root privileges.",
+  "kinds": [
+    "service"
+  ],
+  "activation": "always",
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}
