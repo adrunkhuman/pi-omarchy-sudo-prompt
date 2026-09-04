@@ -8,6 +8,7 @@ import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { commandCarrier, hasPrivilegeCommand } from "./detection.ts";
 import { ensureOmarchyUi, IPC_TARGET } from "./install-omarchy.ts";
+import { piMonitorName } from "./monitor.ts";
 
 const TOOL_NAME = "privileged_exec";
 const APPROVAL_TIMEOUT_MS = 120_000;
@@ -122,6 +123,7 @@ export default function (pi: ExtensionAPI) {
 			reason: params.reason,
 			impact: params.impact,
 			cwd,
+			monitorName: await piMonitorName(pi),
 			timeoutMs: APPROVAL_TIMEOUT_MS,
 			executionTimeoutMs: EXECUTION_TIMEOUT_MS,
 		});

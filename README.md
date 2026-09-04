@@ -22,6 +22,18 @@ Reload Pi after installation:
 
 The extension installs and enables its user-owned Omarchy service under `~/.config/omarchy/plugins/`. It may restart the Omarchy shell when those UI files change.
 
+## Monitor
+
+The generated `~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt/config.json` controls where requests appear:
+
+```json
+{
+  "monitor": "active"
+}
+```
+
+Use `active` for the currently focused monitor or `pi` for the monitor containing Pi's terminal. `pi` is best effort and falls back to `active` when the terminal cannot be identified, such as through SSH or tmux. Changes apply to the next request.
+
 ## How it works
 
 1. The agent calls `privileged_exec(command, reason, impact)`.

@@ -6,10 +6,11 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const IPC_TARGET = "io.github.adrunkhuman.pi-omarchy-sudo-prompt";
-const PLUGIN_VERSION = "0.4.0";
+const PLUGIN_VERSION = "0.5.0";
 
 const sourceDir = resolve(dirname(fileURLToPath(import.meta.url)), "../omarchy");
 const targetDir = join(homedir(), ".config/omarchy/plugins", IPC_TARGET);
+export const CONFIG_PATH = join(targetDir, "config.json");
 const pluginFiles = ["manifest.json", "Service.qml"] as const;
 
 async function installFile(name: (typeof pluginFiles)[number]): Promise<boolean> {
@@ -51,6 +52,14 @@ export async function ensureOmarchyUi(pi: ExtensionAPI): Promise<void> {
 	if (ping.code !== 0) throw new Error("Omarchy shell is not running");
 
 	await mkdir(targetDir, { recursive: true });
+	try {
+		await access(CONFIG_PATH);
+	} catch {
+		await writeFile(CONFIG_PATH, '{\n  "monitor": "active"\n}\n', { flag: "wx", mode: 0o644 }).catch((error) => {
+			if ((error as { code?: string }).code !== "EEXIST") throw error;
+		});
+	}
+
 	let changed = false;
 	for (const name of pluginFiles) changed = (await installFile(name)) || changed;
 

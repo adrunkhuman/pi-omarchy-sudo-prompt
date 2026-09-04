@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.Commons
@@ -18,6 +19,7 @@ Item {
   property double executionTimeoutMs: 610000
   property double nowMs: Date.now()
   property var decisions: ({})
+  property var targetScreen: null
 
   readonly property int secondsLeft: Math.max(0, Math.ceil((deadlineMs - nowMs) / 1000))
   readonly property color accent: Color.polkit.accent
@@ -31,6 +33,13 @@ Item {
 
   function response(id, state, reason, feedback) {
     return JSON.stringify({ id: id, state: state, reason: reason || "", feedback: feedback || "" })
+  }
+
+  function screenForName(name) {
+    for (var index = 0; index < Quickshell.screens.length; index++) {
+      if (Quickshell.screens[index].name === name) return Quickshell.screens[index]
+    }
+    return null
   }
 
   function decide(state, reason, feedback) {
@@ -54,6 +63,9 @@ Item {
       return JSON.stringify({ accepted: false, state: "invalid-request" })
     }
 
+    var monitorName = String(payload.monitorName || "")
+    if (!monitorName && Hyprland.focusedMonitor) monitorName = Hyprland.focusedMonitor.name
+    targetScreen = screenForName(monitorName)
     requestId = String(payload.id)
     commandText = String(payload.command)
     reasonText = String(payload.reason)
@@ -81,6 +93,7 @@ Item {
       else {
         delete root.decisions[root.requestId]
         root.requestId = ""
+        root.targetScreen = null
       }
     }
   }
@@ -88,7 +101,7 @@ Item {
   IpcHandler {
     target: "io.github.adrunkhuman.pi-omarchy-sudo-prompt"
 
-    function version(): string { return "0.4.0" }
+    function version(): string { return "0.5.0" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)
@@ -103,13 +116,17 @@ Item {
     function dismiss(id: string): string {
       if (root.pending && root.requestId === id) root.decide("deny", "dismissed", "")
       delete root.decisions[id]
-      if (root.requestId === id) root.requestId = ""
+      if (root.requestId === id) {
+        root.requestId = ""
+        root.targetScreen = null
+      }
       return "ok"
     }
   }
 
   PanelWindow {
     id: panel
+    screen: root.targetScreen
     visible: root.pending
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
