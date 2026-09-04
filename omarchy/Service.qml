@@ -88,7 +88,7 @@ Item {
   IpcHandler {
     target: "io.github.adrunkhuman.pi-privileged-exec"
 
-    function version(): string { return "0.2.0" }
+    function version(): string { return "0.2.1" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)
@@ -148,7 +148,7 @@ Item {
 
     BorderSurface {
       id: card
-      width: Math.min(Style.space(760), panel.width - Style.gapsOut * 2)
+      width: Math.min(Style.space(620), panel.width - Style.gapsOut * 2)
       height: Math.min(
         panel.height - Style.gapsOut * 2,
         Math.max(
@@ -352,8 +352,8 @@ Item {
             Item {
               id: denyAction
               anchors.top: parent.top
+              anchors.right: parent.right
               anchors.bottom: parent.bottom
-              anchors.left: parent.left
               width: Style.space(116)
 
               Text {
@@ -374,18 +374,18 @@ Item {
             Rectangle {
               anchors.top: parent.top
               anchors.topMargin: 1
-              anchors.right: parent.right
-              anchors.rightMargin: 1
+              anchors.right: denyAction.left
               anchors.bottom: parent.bottom
               anchors.bottomMargin: 1
-              anchors.left: denyAction.right
+              anchors.left: parent.left
+              anchors.leftMargin: 1
               radius: Math.max(1, root.cornerRadius - 1)
               color: Util.alpha(root.foreground, 0.035)
 
               Rectangle {
                 anchors.top: parent.top
+                anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.left: parent.left
                 width: 1
                 color: Util.alpha(root.foreground, 0.2)
               }
