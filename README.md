@@ -11,7 +11,7 @@ Privileged commands should not wait invisibly.
 Requirements: Pi, `pkexec`, and a running Omarchy shell with its Polkit agent.
 
 ```sh
-pi install https://github.com/adrunkhuman/pi-omarchy-sudo-prompt
+pi install npm:pi-omarchy-sudo-prompt
 ```
 
 Reload Pi after installation:
@@ -53,7 +53,7 @@ Approval requests expire after the configured timeout. Long requests scroll; sho
 
 ## Scope
 
-This catches ordinary agent mistakes and invisible password stalls. It is not a sandbox.
+This catches ordinary agent mistakes and invisible password stalls. It is not a sandbox or a safety check. Approval runs the displayed shell command with full root access. Review that command yourself; the reason and impact are agent-provided context.
 
 The guard sees commands present in those tool arguments. It cannot reliably inspect privilege escalation hidden inside downloaded scripts, build systems, encoded commands, or unrelated terminals.
 
@@ -62,7 +62,7 @@ The review screen never collects a password. Omarchy's Polkit agent owns authent
 ## Remove
 
 ```sh
-pi remove https://github.com/adrunkhuman/pi-omarchy-sudo-prompt
+pi remove npm:pi-omarchy-sudo-prompt
 omarchy-shell shell setPluginEnabled io.github.adrunkhuman.pi-omarchy-sudo-prompt false
 rm -rf ~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt
 ```
@@ -77,5 +77,3 @@ Then reload Pi.
 npm test
 pi -ne -e .
 ```
-
-The package is private and not published to npm.

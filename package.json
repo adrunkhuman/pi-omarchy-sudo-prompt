@@ -1,17 +1,28 @@
 {
   "name": "pi-omarchy-sudo-prompt",
   "version": "0.6.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
+  "author": "adrunkhuman",
   "description": "Visible, explained privilege requests for Pi on Omarchy",
   "keywords": [
-    "pi-package"
+    "pi-package",
+    "pi",
+    "omarchy",
+    "sudo",
+    "pkexec",
+    "polkit",
+    "privilege"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adrunkhuman/pi-omarchy-sudo-prompt.git"
   },
+  "files": [
+    "assets/approval.png",
+    "extension",
+    "omarchy"
+  ],
   "scripts": {
     "test": "node --test test/*.test.ts",
     "check": "npm test"
@@ -19,7 +30,8 @@
   "pi": {
     "extensions": [
       "./extension/index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/adrunkhuman/pi-omarchy-sudo-prompt/main/assets/approval.png"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
