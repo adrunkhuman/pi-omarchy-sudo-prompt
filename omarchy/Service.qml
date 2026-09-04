@@ -29,13 +29,13 @@ Item {
   readonly property int contentMargin: Style.spacing.panelPadding
   readonly property var borderSpec: Border.surfaceSpec("polkit", "border", borderColor, Math.max(1, Style.space(2)), "border-alpha")
 
-  function response(id, state, reason) {
-    return JSON.stringify({ id: id, state: state, reason: reason || "" })
+  function response(id, state, reason, feedback) {
+    return JSON.stringify({ id: id, state: state, reason: reason || "", feedback: feedback || "" })
   }
 
-  function decide(state, reason) {
+  function decide(state, reason, feedback) {
     if (!pending || !requestId) return
-    decisions[requestId] = { state: state, reason: reason || "user" }
+    decisions[requestId] = { state: state, reason: reason || "user", feedback: feedback || "" }
     pending = false
     deadlineMs = Date.now() + (state === "allow" ? executionTimeoutMs + 30000 : 30000)
   }
@@ -62,7 +62,8 @@ Item {
     nowMs = Date.now()
     deadlineMs = nowMs + Math.max(5000, Number(payload.timeoutMs) || 120000)
     executionTimeoutMs = Math.max(10000, Number(payload.executionTimeoutMs) || 610000)
-    decisions[requestId] = { state: "pending", reason: "" }
+    decisions[requestId] = { state: "pending", reason: "", feedback: "" }
+    denyFeedback.text = ""
     pending = true
     commandView.contentY = 0
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
@@ -76,7 +77,7 @@ Item {
     onTriggered: {
       root.nowMs = Date.now()
       if (root.nowMs < root.deadlineMs) return
-      if (root.pending) root.decide("deny", "timeout")
+      if (root.pending) root.decide("deny", "timeout", "")
       else {
         delete root.decisions[root.requestId]
         root.requestId = ""
@@ -87,7 +88,7 @@ Item {
   IpcHandler {
     target: "io.github.adrunkhuman.pi-privileged-exec"
 
-    function version(): string { return "0.1.0" }
+    function version(): string { return "0.2.0" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)
@@ -95,12 +96,12 @@ Item {
 
     function state(id: string): string {
       var decision = root.decisions[id]
-      if (!decision) return root.response(id, "deny", "unknown-request")
-      return root.response(id, decision.state, decision.reason)
+      if (!decision) return root.response(id, "deny", "unknown-request", "")
+      return root.response(id, decision.state, decision.reason, decision.feedback)
     }
 
     function dismiss(id: string): string {
-      if (root.pending && root.requestId === id) root.decide("deny", "dismissed")
+      if (root.pending && root.requestId === id) root.decide("deny", "dismissed", "")
       delete root.decisions[id]
       if (root.requestId === id) root.requestId = ""
       return "ok"
@@ -135,7 +136,7 @@ Item {
       Keys.priority: Keys.BeforeItem
       Keys.onPressed: function(event) {
         if (event.key === Qt.Key_Escape) {
-          root.decide("deny", "escape")
+          root.decide("deny", "escape", denyFeedback.text.trim())
           event.accepted = true
         } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
                    && (event.modifiers & Qt.ControlModifier)) {
@@ -348,18 +349,86 @@ Item {
             border.width: 1
             border.color: Util.alpha(root.foreground, 0.2)
 
-            Text {
-              anchors.centerIn: parent
-              text: "Deny  [Esc]"
-              color: root.foreground
-              font.family: Style.fontFamily
-              font.pixelSize: Style.font.body
+            Item {
+              id: denyAction
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              anchors.left: parent.left
+              width: Style.space(116)
+
+              Text {
+                anchors.centerIn: parent
+                text: "Deny  [Esc]"
+                color: root.foreground
+                font.family: Style.fontFamily
+                font.pixelSize: Style.font.body
+              }
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.decide("deny", "user", denyFeedback.text.trim())
+              }
             }
 
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: root.decide("deny", "user")
+            Rectangle {
+              anchors.top: parent.top
+              anchors.topMargin: 1
+              anchors.right: parent.right
+              anchors.rightMargin: 1
+              anchors.bottom: parent.bottom
+              anchors.bottomMargin: 1
+              anchors.left: denyAction.right
+              radius: Math.max(1, root.cornerRadius - 1)
+              color: Util.alpha(root.foreground, 0.035)
+
+              Rectangle {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                width: 1
+                color: Util.alpha(root.foreground, 0.2)
+              }
+
+              TextInput {
+                id: denyFeedback
+                anchors.fill: parent
+                anchors.leftMargin: Style.space(10)
+                anchors.rightMargin: Style.space(10)
+                verticalAlignment: TextInput.AlignVCenter
+                maximumLength: 160
+                clip: true
+                color: root.foreground
+                selectionColor: Util.alpha(root.accent, 0.45)
+                selectedTextColor: root.foreground
+                font.family: Style.fontFamily
+                font.pixelSize: Style.font.bodySmall
+
+                Keys.priority: Keys.BeforeItem
+                Keys.onPressed: function(event) {
+                  if (event.key === Qt.Key_Escape) {
+                    root.decide("deny", "escape", denyFeedback.text.trim())
+                    event.accepted = true
+                  } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                             && (event.modifiers & Qt.ControlModifier)) {
+                    root.decide("allow", "user", "")
+                    event.accepted = true
+                  } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                    root.decide("deny", "user", denyFeedback.text.trim())
+                    event.accepted = true
+                  }
+                }
+              }
+
+              Text {
+                anchors.fill: denyFeedback
+                verticalAlignment: Text.AlignVCenter
+                text: "why? (optional)"
+                color: Util.alpha(root.foreground, 0.36)
+                font.family: Style.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                visible: denyFeedback.text.length === 0
+              }
             }
           }
 

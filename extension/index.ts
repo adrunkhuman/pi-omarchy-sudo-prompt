@@ -20,6 +20,7 @@ interface ApprovalState {
 	id: string;
 	state: "pending" | "allow" | "deny";
 	reason?: string;
+	feedback?: string;
 }
 
 function shellQuote(value: string): string {
@@ -211,7 +212,14 @@ export default function (pi: ExtensionAPI) {
 				try {
 					const approval = await requestApproval(params, ctx.cwd, signal);
 					approvalId = approval.id;
-					if (approval.state !== "allow") throw new Error(`Privilege request denied (${approval.reason ?? "user"}).`);
+					if (approval.state !== "allow") {
+						const feedback = approval.feedback?.trim();
+						throw new Error(
+							feedback
+								? `Privilege request denied. User feedback: ${feedback}`
+								: `Privilege request denied (${approval.reason ?? "user"}).`,
+						);
+					}
 
 					const wrappedCommand = `cd -- ${shellQuote(ctx.cwd)} && ${params.command}`;
 					const result = await pi.exec(

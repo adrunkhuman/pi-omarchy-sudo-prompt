@@ -26,7 +26,7 @@ The extension installs and enables its user-owned Omarchy service under `~/.conf
 
 1. The agent calls `privileged_exec(command, reason, impact)`.
 2. The desktop shows the exact request.
-3. You approve with a click or **Ctrl+Enter**. **Esc** denies it.
+3. You approve with a click or **Ctrl+Enter**. To deny, optionally type a short reply for the agent, then click **Deny**, press **Enter** in the reply field, or press **Esc**.
 4. `pkexec` starts Omarchy's real Polkit authentication flow.
 5. The command runs as root only after both steps succeed.
 

@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const IPC_TARGET = "io.github.adrunkhuman.pi-privileged-exec";
-const PLUGIN_VERSION = "0.1.0";
+const PLUGIN_VERSION = "0.2.0";
 
 const sourceDir = resolve(dirname(fileURLToPath(import.meta.url)), "../omarchy");
 const targetDir = join(homedir(), ".config/omarchy/plugins", IPC_TARGET);
