@@ -88,7 +88,7 @@ Item {
   IpcHandler {
     target: "io.github.adrunkhuman.pi-privileged-exec"
 
-    function version(): string { return "0.3.0" }
+    function version(): string { return "0.3.1" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)
@@ -422,7 +422,7 @@ Item {
               Text {
                 anchors.fill: denyFeedback
                 verticalAlignment: Text.AlignVCenter
-                text: "why? (optional)"
+                text: "why?"
                 color: Util.alpha(root.foreground, 0.36)
                 font.family: Style.fontFamily
                 font.pixelSize: Style.font.bodySmall
