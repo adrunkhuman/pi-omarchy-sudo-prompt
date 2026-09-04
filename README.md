@@ -22,17 +22,20 @@ Reload Pi after installation:
 
 The extension installs and enables its user-owned Omarchy service under `~/.config/omarchy/plugins/`. It may restart the Omarchy shell when those UI files change.
 
-## Monitor
+## Settings
 
-The generated `~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt/config.json` controls where requests appear:
+Edit `~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt/config.json`:
 
 ```json
 {
-  "monitor": "active"
+  "monitor": "active",
+  "timeoutSeconds": 120
 }
 ```
 
-Use `active` for the currently focused monitor or `pi` for the monitor containing Pi's terminal. `pi` is best effort and falls back to `active` when the terminal cannot be identified, such as through SSH or tmux. Changes apply to the next request.
+`monitor` accepts `active` for the currently focused monitor or `pi` for the monitor containing Pi's terminal. `pi` is best effort and falls back to `active` when the terminal cannot be identified, such as through SSH or tmux.
+
+`timeoutSeconds` controls how long the approval screen waits. The minimum is five seconds. Changes apply to the next request.
 
 ## How it works
 
@@ -46,7 +49,7 @@ Approved input runs as `/usr/bin/bash -c` from Pi's current directory. A root-si
 
 A command-position heuristic catches ordinary `sudo`, `sudoedit`, `doas`, `pkexec`, and `su` calls in Pi's Bash tool and Herdr's `run` and `send` actions. It does not parse shell syntax. The agent gets a short instruction to use `privileged_exec` instead.
 
-Approval requests expire after two minutes. Long requests scroll; short requests stay compact.
+Approval requests expire after the configured timeout. Long requests scroll; short requests stay compact.
 
 ## Scope
 

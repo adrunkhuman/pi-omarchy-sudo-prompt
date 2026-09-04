@@ -4,6 +4,20 @@ import { CONFIG_PATH } from "./install-omarchy.ts";
 
 type Client = { pid?: number; monitor?: number };
 type Monitor = { id?: number; name?: string };
+type Settings = { monitor: "active" | "pi"; timeoutSeconds: number };
+
+const DEFAULT_SETTINGS: Settings = { monitor: "active", timeoutSeconds: 120 };
+
+export function parseSettings(value: unknown): Settings {
+	if (!value || typeof value !== "object") return DEFAULT_SETTINGS;
+	const config = value as { monitor?: unknown; timeoutSeconds?: unknown };
+	const monitor = config.monitor === "pi" ? "pi" : "active";
+	const timeoutSeconds = typeof config.timeoutSeconds === "number"
+		&& Number.isSafeInteger(config.timeoutSeconds) && config.timeoutSeconds > 0
+		? Math.max(5, config.timeoutSeconds)
+		: DEFAULT_SETTINGS.timeoutSeconds;
+	return { monitor, timeoutSeconds };
+}
 
 async function ancestors(pid: number): Promise<number[]> {
 	const result: number[] = [];
@@ -27,10 +41,7 @@ function monitorFor(pids: number[], clients: Client[], monitors: Monitor[]): str
 	return undefined;
 }
 
-export async function piMonitorName(pi: ExtensionAPI): Promise<string | undefined> {
-	const config: unknown = await readFile(CONFIG_PATH, "utf8").then(JSON.parse).catch(() => ({}));
-	if (!config || typeof config !== "object" || (config as { monitor?: string }).monitor !== "pi") return undefined;
-
+async function piMonitorName(pi: ExtensionAPI): Promise<string | undefined> {
 	try {
 		const [clientResult, monitorResult] = await Promise.all([
 			pi.exec("hyprctl", ["-j", "clients"], { timeout: 2_000 }),
@@ -54,4 +65,15 @@ export async function piMonitorName(pi: ExtensionAPI): Promise<string | undefine
 		// The active monitor is the fallback when Pi's window cannot be identified.
 	}
 	return undefined;
+}
+
+export async function requestSettings(
+	pi: ExtensionAPI,
+): Promise<{ monitorName?: string; timeoutMs: number }> {
+	const raw: unknown = await readFile(CONFIG_PATH, "utf8").then(JSON.parse).catch(() => ({}));
+	const settings = parseSettings(raw);
+	return {
+		monitorName: settings.monitor === "pi" ? await piMonitorName(pi) : undefined,
+		timeoutMs: settings.timeoutSeconds * 1_000,
+	};
 }

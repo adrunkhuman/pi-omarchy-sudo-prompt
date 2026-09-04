@@ -8,10 +8,9 @@ import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { commandCarrier, hasPrivilegeCommand } from "./detection.ts";
 import { ensureOmarchyUi, IPC_TARGET } from "./install-omarchy.ts";
-import { piMonitorName } from "./monitor.ts";
+import { requestSettings } from "./monitor.ts";
 
 const TOOL_NAME = "privileged_exec";
-const APPROVAL_TIMEOUT_MS = 120_000;
 const ROOT_TIMEOUT_SECONDS = 10 * 60;
 const EXECUTION_TIMEOUT_MS = (ROOT_TIMEOUT_SECONDS + 10) * 1_000;
 const RETRY_MESSAGE =
@@ -117,14 +116,15 @@ export default function (pi: ExtensionAPI) {
 		signal?: AbortSignal,
 	): Promise<ApprovalState> {
 		const id = crypto.randomUUID();
+		const settings = await requestSettings(pi);
 		const payload = JSON.stringify({
 			id,
 			command: params.command,
 			reason: params.reason,
 			impact: params.impact,
 			cwd,
-			monitorName: await piMonitorName(pi),
-			timeoutMs: APPROVAL_TIMEOUT_MS,
+			monitorName: settings.monitorName,
+			timeoutMs: settings.timeoutMs,
 			executionTimeoutMs: EXECUTION_TIMEOUT_MS,
 		});
 		const acknowledgement = parseJson<{ accepted?: boolean; state?: string }>(
@@ -135,7 +135,7 @@ export default function (pi: ExtensionAPI) {
 			throw new Error(`Privilege approval screen rejected the request (${acknowledgement.state ?? "unknown"}).`);
 		}
 
-		const deadline = Date.now() + APPROVAL_TIMEOUT_MS + 2_000;
+		const deadline = Date.now() + settings.timeoutMs + 2_000;
 		try {
 			while (Date.now() < deadline) {
 				await abortableDelay(250, signal);

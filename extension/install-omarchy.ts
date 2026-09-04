@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const IPC_TARGET = "io.github.adrunkhuman.pi-omarchy-sudo-prompt";
-const PLUGIN_VERSION = "0.5.0";
+const PLUGIN_VERSION = "0.6.0";
 
 const sourceDir = resolve(dirname(fileURLToPath(import.meta.url)), "../omarchy");
 const targetDir = join(homedir(), ".config/omarchy/plugins", IPC_TARGET);
@@ -55,7 +55,7 @@ export async function ensureOmarchyUi(pi: ExtensionAPI): Promise<void> {
 	try {
 		await access(CONFIG_PATH);
 	} catch {
-		await writeFile(CONFIG_PATH, '{\n  "monitor": "active"\n}\n', { flag: "wx", mode: 0o644 }).catch((error) => {
+		await writeFile(CONFIG_PATH, '{\n  "monitor": "active",\n  "timeoutSeconds": 120\n}\n', { flag: "wx", mode: 0o644 }).catch((error) => {
 			if ((error as { code?: string }).code !== "EEXIST") throw error;
 		});
 	}
