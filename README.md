@@ -11,7 +11,7 @@ Privileged commands should not wait invisibly.
 Requirements: Pi, `pkexec`, and a running Omarchy shell with its Polkit agent.
 
 ```sh
-pi install git:github.com/adrunkhuman/pi-privileged-exec
+pi install git:git@github.com:adrunkhuman/pi-privileged-exec
 ```
 
 Reload Pi after installation:
@@ -20,7 +20,7 @@ Reload Pi after installation:
 /reload
 ```
 
-The extension installs and enables its user-owned Omarchy service under `~/.config/omarchy/plugins/`.
+The extension installs and enables its user-owned Omarchy service under `~/.config/omarchy/plugins/`. It may restart the Omarchy shell when those UI files change.
 
 ## How it works
 
@@ -47,7 +47,7 @@ The review screen never collects a password. Omarchy's Polkit agent owns authent
 ## Remove
 
 ```sh
-pi remove git:github.com/adrunkhuman/pi-privileged-exec
+pi remove git:git@github.com:adrunkhuman/pi-privileged-exec
 omarchy-shell shell setPluginEnabled io.github.adrunkhuman.pi-privileged-exec false
 rm -rf ~/.config/omarchy/plugins/io.github.adrunkhuman.pi-privileged-exec
 ```
