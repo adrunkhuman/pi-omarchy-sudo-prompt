@@ -86,9 +86,9 @@ Item {
   }
 
   IpcHandler {
-    target: "io.github.adrunkhuman.pi-privileged-exec"
+    target: "io.github.adrunkhuman.pi-omarchy-sudo-prompt"
 
-    function version(): string { return "0.3.1" }
+    function version(): string { return "0.4.0" }
 
     function request(payloadJson: string): string {
       return root.begin(payloadJson)

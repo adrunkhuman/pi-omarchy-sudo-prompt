@@ -1,6 +1,6 @@
 {
-  "name": "pi-privileged-exec",
-  "version": "0.3.1",
+  "name": "pi-omarchy-sudo-prompt",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/adrunkhuman/pi-privileged-exec.git"
+    "url": "git+ssh://git@github.com/adrunkhuman/pi-omarchy-sudo-prompt.git"
   },
   "scripts": {
     "test": "node --test test/*.test.ts",

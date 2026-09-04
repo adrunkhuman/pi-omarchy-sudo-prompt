@@ -1,17 +1,17 @@
-# pi-privileged-exec
+# pi-omarchy-sudo-prompt
 
 Privileged commands should not wait invisibly.
 
 ![Pi privilege approval prompt](assets/approval.png)
 
-`pi-privileged-exec` gives Pi an explicit root-command tool on Omarchy. The agent states the command, reason, and impact. You approve it on the desktop. Polkit handles authentication.
+`pi-omarchy-sudo-prompt` gives Pi an explicit root-command tool on Omarchy. The agent states the command, reason, and impact. You approve it on the desktop. Polkit handles authentication.
 
 ## Install
 
 Requirements: Pi, `pkexec`, and a running Omarchy shell with its Polkit agent.
 
 ```sh
-pi install git:git@github.com:adrunkhuman/pi-privileged-exec
+pi install git:git@github.com:adrunkhuman/pi-omarchy-sudo-prompt
 ```
 
 Reload Pi after installation:
@@ -47,9 +47,9 @@ The review screen never collects a password. Omarchy's Polkit agent owns authent
 ## Remove
 
 ```sh
-pi remove git:git@github.com:adrunkhuman/pi-privileged-exec
-omarchy-shell shell setPluginEnabled io.github.adrunkhuman.pi-privileged-exec false
-rm -rf ~/.config/omarchy/plugins/io.github.adrunkhuman.pi-privileged-exec
+pi remove git:git@github.com:adrunkhuman/pi-omarchy-sudo-prompt
+omarchy-shell shell setPluginEnabled io.github.adrunkhuman.pi-omarchy-sudo-prompt false
+rm -rf ~/.config/omarchy/plugins/io.github.adrunkhuman.pi-omarchy-sudo-prompt
 ```
 
 That plugin directory is managed by this package. Inspect it before removing it if you edited or added files there.
